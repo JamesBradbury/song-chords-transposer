@@ -1,5 +1,7 @@
 '''
 Module containing chord class and related constants.
+
+Can now handle sub-chords
 '''
 
 ST_IN_OCTAVE = 12
@@ -200,7 +202,6 @@ class Chord(object):
 
 def test_chord():
     '''Set of simple tests for chord class.'''
-    a = Chord("A#  ")
     b = Chord("Bm")
     c = Chord("S/G")
     print "'S/G' is valid: ", c.is_valid()
