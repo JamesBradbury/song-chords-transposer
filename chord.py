@@ -166,11 +166,11 @@ class Chord(object):
 
     def get_sharp_name(self):
         """Returns the chord's root sharp name, or an empty string."""
-        return self.__sharp_name
+        return self.__sharp_name + self.get_suffixes()
 
     def get_flat_name(self):
         """Returns the chord's root flat name, or an empty string."""
-        return self.__flat_name
+        return self.__flat_name + self.get_suffixes()
 
     def get_suffixes(self):
         """Returns the chord's suffixes (and sub-chord), or an empty string."""
