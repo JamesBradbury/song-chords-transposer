@@ -4,9 +4,7 @@ Module containing chord class and related constants.
 
 ST_IN_OCTAVE = 12
 
-DEFAULT_CHORD_ROOTS = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#',
-                       'E', 'F', 'F#', 'G', 'G#']
-
+DEFAULT_CHORD_ROOTS = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
 ILLEGAL_CHORD_NAMES = ['Chorus', 'Bridge', 'Capo']
 
 SUBCHORD_SEPS = ['/']
@@ -25,23 +23,23 @@ SCALE_MAP = {1: ('A',),
              11: ('G',),
              12: ('G#', 'Ab')}
 
-CHORD_MAP = {'A' : 1,
+CHORD_MAP = {'A': 1,
              'A#': 2,
              'Bb': 2,
              'Hb': 2,  # German notation
-             'B' : 3,
-             'H' : 3,  # German notation
-             'C' : 4,
+             'B': 3,
+             'H': 3,   # German notation
+             'C': 4,
              'C#': 5,
              'Db': 5,
-             'D' : 6,
+             'D': 6,
              'D#': 7,
              'Eb': 7,
-             'E' : 8,
-             'F' : 9,
+             'E': 8,
+             'F': 9,
              'F#': 10,
              'Gb': 10,
-             'G' : 11,
+             'G': 11,
              'G#': 12,
              'Ab': 12}
 
@@ -59,9 +57,9 @@ class Chord(object):
     __sub_chord = None
 
     def __init__(self, *args):
-        if len(args) == 1 and type(args[0] == int):
+        if len(args) == 1 and type(args[0] == str):
             self._setup_with_text(args[0])
-        elif len(args) == 2 and type(args[0] == str):
+        elif len(args) == 2 and type(args[0] == int):
             self._setup_with_index(args[0], args[1])
         else:
             print("Invalid chord parameters.")
@@ -84,7 +82,7 @@ class Chord(object):
                 sub_chord_found = True
                 sub_chord_text = suffixes.split(sep)[1]
                 self.__suffixes = suffixes.split(sep)[0]
-                #print("DEBUG: sub-chord found: %s, suffixes: %s" % (sub_chord_text, self.__suffixes)
+                # print("DEBUG: sub-chord found: %s, suffixes: %s" % (sub_chord_text, self.__suffixes)
                 self.__sub_chord = Chord(sub_chord_text) 
         
         if not sub_chord_found:        
@@ -95,7 +93,7 @@ class Chord(object):
         Creates a chord with the specified index and the specified suffixes,
         which are not checked.
         """
-        if not index in SCALE_MAP:
+        if index not in SCALE_MAP:
             print("Invalid index: %s" % index)
         else:
             self.__index = index
@@ -113,10 +111,10 @@ class Chord(object):
         class variables above.
         """
         self._populate_names_and_suffixes(chord_text.strip())
-        if self.__sharp_name != '':
+        if self.__sharp_name in CHORD_MAP:
             self.__index = CHORD_MAP[self.__sharp_name]
             self._setup_with_index(self.__index, self.__suffixes)
-        elif self.__flat_name != '':
+        elif self.__flat_name in CHORD_MAP:
             self.__index = CHORD_MAP[self.__flat_name]
             self._setup_with_index(self.__index, self.__suffixes)
         else:
@@ -193,38 +191,8 @@ class Chord(object):
         self._setup_with_index(((self.__index + semitones - 1) % ST_IN_OCTAVE) + 1,
                                self.__suffixes)
         if self.__sub_chord:
-            # print("DEBUG: transposing sub-chord: %s" % self.__sub_chord.get_chord_text()
             self.__sub_chord.transpose(semitones)
-            # print("DEBUG: transposed sub-chord: %s" % self.__sub_chord.get_chord_text()
 
-
-def test_chord():
-    """Set of simple tests for chord class."""
-    a = Chord("A#  ")
-    b = Chord("Bm")
-    c = Chord("S/G")
-    print("'S/G' is valid: ", c.is_valid())
-    d = Chord("D#7Sus2")
-    print("chord name: ", d.get_chord_text())
-    em = Chord(8, 'm')
-    print("---")
-    print("Chord name: ", em.get_chord_text())
-    print("sharp name: ", em.get_sharp_name())
-    print("flat name: ", em.get_flat_name())
-    em.transpose(-3)
-    print("- transpose Em -3 -")
-    print("Chord name: ", em.get_chord_text())
-    print("sharp name: ", em.get_sharp_name())
-    print("flat name: ", em.get_flat_name())
-    b.transpose(-2)
-    print("- transpose Bm -2 -")
-    print("Chord name: ", b.get_chord_text())
-    print("sharp name: ", b.get_sharp_name())
-    print("flat name: ", b.get_flat_name())
-    print("Suffixes: ", b.get_suffixes())
 
 if __name__ == '__main__':
     print("Chord class loaded as main")
-    test_chord()
-
-# x-test
