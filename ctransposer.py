@@ -34,7 +34,7 @@ def is_chord_line(line):
                 chordy += 1
             # Count any other "ordinary" chars as non-chordy
             elif 33 <= ord(char) <= 126:
-                non_chordy +=1         
+                non_chordy += 1
         previous_char = char
     
     if line.strip(' ').startswith('C '):
