@@ -2,6 +2,7 @@
 Transposes chords text files into other keys.
 Can be helpful for acoustic players with a capo.
 """
+import logging
 import sys
 import chord
 # from string import letters, digits
@@ -74,7 +75,7 @@ def split_chord_line(c_line):
     return chords
 
 
-def get_chords_from_song(song, shift=0):
+def get_chords_from_song(song):
     """
     Extracts chords from a list of strings (eg: file) and stores them in a
     dictionary indexed by line number with values in the following form:
@@ -84,14 +85,12 @@ def get_chords_from_song(song, shift=0):
     indexed_chord_lines = {}
     found_some_chords = False
     for line_no, line_text in enumerate(song):
-        if line_no == 21:
-            print("DEBUG: line found!!", line_text)
         if is_chord_line(line_text):
             # TODO: check '    C    G' works here.
             found_some_chords = True
             indexed_chord_lines[line_no] = split_chord_line(line_text)
     if not found_some_chords:
-        print("Could not find any chords in song!")
+        logging.error("Could not find any chords in song!")
         
     return indexed_chord_lines
 
@@ -109,7 +108,7 @@ def transpose_song_dict(chords_dict, semitones):
                     chord_ref[0].transpose(semitones)
 
 
-def transpose_song_lines(song, semitones, empty_list_on_error=True):
+def transpose_song_lines(song, semitones):
     """
     Transposes all chords in the file by the number of semitones specified.
     If there are any errors, then, by default, an empty list is returned.
@@ -152,7 +151,7 @@ def handle_options():
     options, _ = ops.parse_args()
     
     if options.filename == '':
-        print("No file specified - nothing to do!")
+        logging.error("No file specified - nothing to do!")
         sys.exit(1)
         
     return options.filename, options.semitones, options.auto
@@ -169,8 +168,8 @@ def main():
         # song_chords = get_chords_from_song(song_lines)
         transposed_song = transpose_song_lines(song_lines, semitones)
         
-        print("orig:", song_lines[21])
-        print("tran:", transposed_song[21])
+        logging.info("orig: {}".format(song_lines[21]))
+        logging.info("tran: {}".format(transposed_song[21]))
   
     if semitones > 0:
         file_suffix = '+' + str(semitones)
@@ -183,8 +182,8 @@ def main():
         
     with open(new_filename, mode='w') as tran_file:
         tran_file.writelines(transposed_song)
-        print("Wrote: %s line to file %s" % (len(transposed_song),
-                                             filename + file_suffix))
+        logging.info("Wrote: %s line to file {}".format(len(transposed_song),
+                                                        filename + file_suffix))
         
     
 if __name__ == '__main__':

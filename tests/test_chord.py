@@ -71,3 +71,48 @@ class TestTransposeChords(unittest.TestCase):
             c.transpose(semitones=semitones)
             self.assertEqual(c.get_chord_text(), expectation)
 
+
+class TestGetDifficulty(unittest.TestCase):
+    def setUp(self):
+        self.simple_data_and_expectations = [
+            ('E', 0),
+            ('F', 1),
+            ('B', 5),
+            ('A', 1),
+            ('G', 0),
+            ('C', 0),
+        ]
+        self.sharps_flats_minors_data_and_expectations = [
+            ('Em', 0),
+            ('F#', 5),
+            ('Bm', 2),
+            ('Am', 0),
+            ('Gb', 5),
+            ('C#m', 5),
+        ]
+        self.suffixes_data_and_expectations = [
+            ('Asus2', 1),
+            ('Dsus4', 0),
+            ('Cadd9', 0),
+            ('E7', 0),
+            ('Gbm', 5),
+            ('C#m7', 5),
+        ]
+
+    def test_simple_chords(self):
+        for chord_text, expected_difficulty in self.simple_data_and_expectations:
+            c = chord.Chord(chord_text)
+            result = c.get_difficulty()
+            self.assertEqual(result, expected_difficulty)
+
+    def test_sharps_flats_minors(self):
+        for chord_text, expected_difficulty in self.sharps_flats_minors_data_and_expectations:
+            c = chord.Chord(chord_text)
+            result = c.get_difficulty()
+            self.assertEqual(result, expected_difficulty)
+
+    def test_suffixes(self):
+        for chord_text, expected_difficulty in self.suffixes_data_and_expectations:
+            c = chord.Chord(chord_text)
+            result = c.get_difficulty()
+            self.assertEqual(result, expected_difficulty)

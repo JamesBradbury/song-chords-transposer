@@ -1,6 +1,7 @@
 """
 Module containing chord class and related constants.
 """
+import logging
 
 ST_IN_OCTAVE = 12
 
@@ -43,6 +44,29 @@ CHORD_MAP = {'A': 1,
              'G#': 12,
              'Ab': 12}
 
+# Subjective assessment of how hard it is to play different chord shapes. 0=Easy, 5=Hard
+# Usually barre chords are harder.
+# Not all variations and chord shapes can listed, but it can fall back to the base if not found.
+CHORD_DIFFICULTY = {'A': 1,
+                    'Am': 0,
+                    'A#': 5,
+                    'Bb': 5,
+                    'B': 5,
+                    'Bm': 2,
+                    'C': 0,
+                    'C#': 5,
+                    'Db': 5,
+                    'D': 0,
+                    'D#': 5,
+                    'Eb': 5,
+                    'E': 0,
+                    'F': 1,
+                    'F#': 5,
+                    'Gb': 5,
+                    'G': 0,
+                    'G#': 5,
+                    'Ab': 5}
+
 
 class Chord(object):
     """
@@ -62,7 +86,7 @@ class Chord(object):
         elif len(args) == 2 and type(args[0] == int):
             self._setup_with_index(args[0], args[1])
         else:
-            print("Invalid chord parameters.")
+            logging.warning("Invalid chord parameters: {}".format(args))
 
     def __str__(self):
         """Returns the string used when class instance is printed"""
@@ -94,7 +118,7 @@ class Chord(object):
         which are not checked.
         """
         if index not in SCALE_MAP:
-            print("Invalid index: %s" % index)
+            logging.warning("Invalid index: {}".format(index))
         else:
             self.__index = index
             self.__sharp_name = SCALE_MAP[index][0]
@@ -118,7 +142,7 @@ class Chord(object):
             self.__index = CHORD_MAP[self.__flat_name]
             self._setup_with_index(self.__index, self.__suffixes)
         else:
-            print("Invalid chord.")
+            logging.warning("Invalid chord: '{}'".format(chord_text))
 
     def _populate_names_and_suffixes(self, chord_text):
         """
@@ -130,7 +154,7 @@ class Chord(object):
         # Check it starts with a valid letter
         valid_letters = set([a[0] for a in CHORD_MAP.keys()])
         if not chord_text[0].upper() in valid_letters:
-            print("Invalid chord found: %s" % chord_text)
+            logging.warning("Invalid chord: '{}'".format(chord_text))
         else:
             # Start name with first letter of chord text in upper case.
             name = chord_text[0].upper()
@@ -193,6 +217,23 @@ class Chord(object):
         if self.__sub_chord:
             self.__sub_chord.transpose(semitones)
 
+    def get_difficulty(self):
+        """
+        Returns an int 1-5 representing how hard the chord is to play, especially on a 12-string with a large action.
+        1 is easy, 5 is hard.
+        :return: int 1-5
+        """
+        if self.get_chord_text() in CHORD_DIFFICULTY:
+            return CHORD_DIFFICULTY[self.get_chord_text()]
+        elif self.__sharp_name in CHORD_DIFFICULTY:
+            return CHORD_DIFFICULTY[self.__sharp_name]
+        elif self.__sharp_name[0] in CHORD_DIFFICULTY:
+            return CHORD_DIFFICULTY[self.__sharp_name[0]]
+        else:
+            logging.ERROR("Could not match difficulty from chord text '{}', defaulting to 3"
+                          .format(self.get_chord_text()))
+            return 3
+
 
 if __name__ == '__main__':
-    print("Chord class loaded as main")
+    logging.info("Chord class loaded as main")
