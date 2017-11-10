@@ -40,8 +40,9 @@ def is_chord_line(line):
     
     if line.strip(' ').startswith('C '):
         result = (chordy >= 1 + (non_chordy * 2)) and not illegal_items
-        print("DEBUG: result: %s, ille_i: %s, ch: %s, n_ch: %s" % (result, illegal_items, chordy, non_chordy))
-        
+        logging.info("DEBUG: result: {}, illegal: {}, ch: {}, n_ch: {}".format(result, illegal_items, chordy,
+                                                                               non_chordy))
+
     return (chordy >= 1 + (non_chordy * 2)) and not illegal_items
 
 
@@ -86,7 +87,6 @@ def get_chords_from_song(song):
     found_some_chords = False
     for line_no, line_text in enumerate(song):
         if is_chord_line(line_text):
-            # TODO: check '    C    G' works here.
             found_some_chords = True
             indexed_chord_lines[line_no] = split_chord_line(line_text)
     if not found_some_chords:
@@ -101,11 +101,23 @@ def transpose_song_dict(chords_dict, semitones):
     of semitones. chords_dict is modified in place.
     """
     if semitones != 0:
-        for line in chords_dict.iteritems():
-            for chord_ref in line[1]:
+        for line_no, line_list in chords_dict.items():
+            for chord_obj, col in line_list:
                 # Check the object type first
-                if type(chord_ref[0]) == chord.Chord:
-                    chord_ref[0].transpose(semitones)
+                if type(chord_obj) == chord.Chord:
+                    chord_obj.transpose(semitones)
+
+
+def get_total_difficulty(chords_dict):
+    """Calculate the total difficulty of a song. Note that difficulties are only comparable for transpositions of a
+       single song, as another song/version may not repeat the chords for every verse."""
+    total = 0
+    for line_no, chord_list in chords_dict.items():
+        for chord_obj, col in chord_list:
+            if type(chord_obj) == chord.Chord:
+                total += chord_obj.get_difficulty()
+
+    return total
 
 
 def transpose_song_lines(song, semitones):
@@ -117,9 +129,10 @@ def transpose_song_lines(song, semitones):
     transposed_song = song[:]
     song_chords = get_chords_from_song(song)
     # Modify song chords in place
+    print("Pre-transpost difficulty: ", get_total_difficulty(chords_dict=song_chords))
     transpose_song_dict(song_chords, semitones)
-    # print song_chords[15]
-    
+    print("Post-transpost difficulty: ", get_total_difficulty(chords_dict=song_chords))
+
     # Put new chords into song lines.
     for line_no in song_chords.keys():
         line_list = list(transposed_song[line_no])
