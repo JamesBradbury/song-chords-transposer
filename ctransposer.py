@@ -40,8 +40,8 @@ def is_chord_line(line):
     
     if line.strip(' ').startswith('C '):
         result = (chordy >= 1 + (non_chordy * 2)) and not illegal_items
-        logging.info("DEBUG: result: {}, illegal: {}, ch: {}, n_ch: {}".format(result, illegal_items, chordy,
-                                                                               non_chordy))
+        logging.debug("DEBUG: result: {}, illegal: {}, ch: {}, n_ch: {}".format(result, illegal_items, chordy,
+                                                                                non_chordy))
 
     return (chordy >= 1 + (non_chordy * 2)) and not illegal_items
 
@@ -116,7 +116,6 @@ def get_total_difficulty(chords_dict):
         for chord_obj, col in chord_list:
             if type(chord_obj) == chord.Chord:
                 total += chord_obj.get_difficulty()
-
     return total
 
 
@@ -129,9 +128,9 @@ def transpose_song_lines(song, semitones):
     transposed_song = song[:]
     song_chords = get_chords_from_song(song)
     # Modify song chords in place
-    print("Pre-transpost difficulty: ", get_total_difficulty(chords_dict=song_chords))
+    # print("Pre-transpose difficulty: ", get_total_difficulty(chords_dict=song_chords))
     transpose_song_dict(song_chords, semitones)
-    print("Post-transpost difficulty: ", get_total_difficulty(chords_dict=song_chords))
+    # print("Post-transpose difficulty: ", get_total_difficulty(chords_dict=song_chords))
 
     # Put new chords into song lines.
     for line_no in song_chords.keys():
@@ -143,6 +142,31 @@ def transpose_song_lines(song, semitones):
         transposed_song[line_no] = "".join(line_list)
             
     return transposed_song
+
+
+def get_lowest_difficulty(song, max_semitones_down=0, max_semitones_up=5):
+    """
+    Returns the transposed song with the lowest difficulty within the semitone limits set.
+    :param song: List of strings representing song text file.
+    :param max_semitones_down: Transposes down to this limit. Default (0) assumes open chords.
+    :param max_semitones_up: Transposes up to this limit. Default 5 should be playable on most guitars.
+    :return: transposed song as a list of strings.
+    """
+    best_difficulty = -1
+    best_transposed_song = []
+    for semitone_offset in range(max_semitones_down, max_semitones_up + 1):
+        song_chords = get_chords_from_song(song=song)
+        transpose_song_dict(chords_dict=song_chords, semitones=semitone_offset)
+        song_difficulty = get_total_difficulty(chords_dict=song_chords)
+        logging.debug("Tried {} semitones, got difficulty: {}".format(semitone_offset, song_difficulty))
+        if best_difficulty == -1 or song_difficulty < best_difficulty:
+            best_transposed_song = transpose_song_lines(song=song, semitones=semitone_offset)
+            best_difficulty = song_difficulty
+            logging.info("Found new best difficulty: {}, when transposed by {} semitones.".format(best_difficulty,
+                                                                                                  semitone_offset))
+
+    logging.info("Final difficulty:{}".format(best_difficulty))
+    return best_transposed_song
 
 
 def handle_options():
@@ -159,6 +183,8 @@ def handle_options():
                    default=False,
                    help="Automatically find a key which is easy to play using open "
                         "chords.")
+    ops.add_option("--log-level", "-l", action="store", dest="log_level", choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
+                   help="Set the logging level")
 
     # Throw away any spare parameters.
     options, _ = ops.parse_args()
@@ -166,7 +192,9 @@ def handle_options():
     if options.filename == '':
         logging.error("No file specified - nothing to do!")
         sys.exit(1)
-        
+
+    logging.basicConfig(level=getattr(logging, options.log_level))
+
     return options.filename, options.semitones, options.auto
 
 
@@ -183,6 +211,8 @@ def main():
         
         logging.info("orig: {}".format(song_lines[21]))
         logging.info("tran: {}".format(transposed_song[21]))
+
+    get_lowest_difficulty(song=song_lines)
   
     if semitones > 0:
         file_suffix = '+' + str(semitones)
