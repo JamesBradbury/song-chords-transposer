@@ -63,6 +63,7 @@ class TestTransposeChords(unittest.TestCase):
             ('Ab', +1, 'A'),
             ('G', +5, 'C'),
             ('C', -5, 'G'),
+            ('F#', -2, 'E'),
         ]
 
     def test_transposing_chords(self):
