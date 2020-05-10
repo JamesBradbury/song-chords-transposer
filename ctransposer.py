@@ -182,7 +182,7 @@ def handle_options():
     ops.add_option("--auto", "-a", action="store_true", dest="auto",
                    default=False,
                    help="Automatically find a key which is easy to play using open "
-                        "chords.")
+                        "chords. NOT IMPLEMENTED.")
     ops.add_option("--log-level", "-l", action="store", dest="log_level", choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
                    help="Set the logging level")
 
