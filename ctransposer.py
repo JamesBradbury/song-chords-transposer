@@ -193,7 +193,7 @@ def handle_options():
         logging.error("No file specified - nothing to do!")
         sys.exit(1)
 
-    logging.basicConfig(level=getattr(logging, options.log_level))
+    # logging.basicConfig(level=getattr(logging, options.log_level))
 
     return options.filename, options.semitones, options.auto
 
